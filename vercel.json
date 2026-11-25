@@ -1,15 +1,55 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/admin.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/admin.html", "destination": "/index.html" },
-    { "source": "/api/admin/login", "destination": "/api/admin-login" },
-    { "source": "/api/admin/agreement", "destination": "/api/agreement" },
-    { "source": "/api/agreement", "destination": "/api/agreement" },
-    { "source": "/api/admin/seller/decision", "destination": "/api/seller-decision" },
-    { "source": "/api/admin/sellers", "destination": "/api/admin-sellers" },
-    { "source": "/api/leads", "destination": "/api/leads" },
-    { "source": "/api/(.*)", "destination": "/api/$1" }
+    {
+      "source": "/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/admin/login",
+      "destination": "/api/admin-login"
+    },
+    {
+      "source": "/api/admin/agreement",
+      "destination": "/api/agreement"
+    },
+    {
+      "source": "/api/agreement",
+      "destination": "/api/agreement"
+    },
+    {
+      "source": "/api/admin/seller/decision",
+      "destination": "/api/seller-decision"
+    },
+    {
+      "source": "/api/admin/sellers",
+      "destination": "/api/admin-sellers"
+    },
+    {
+      "source": "/api/leads",
+      "destination": "/api/leads"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
   ]
 }
