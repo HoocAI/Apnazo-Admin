@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Operations · Apnazo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+  <style>
+    :root {
+      --primary: #0f43b3;
+      --primary-hover: #0a2f80;
+      --orange: #ff7a00;
+      --orange-hover: #e86f00;
+      --deep: #0a2a75;
+      --ink: #0b1b45;
+      --muted: #5a6785;
+      --bg: #f4f7fc;
+      --sidebar-bg: rgba(255, 255, 255, 0.88);
+      --surface: rgba(255, 255, 255, 0.82);
+      --border: rgba(15, 67, 179, 0.08);
+      --border-light: rgba(226, 232, 240, 0.9);
+      --success: #059669;
+      --success-bg: rgba(5, 150, 105, 0.09);
+      --warning: #d97706;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --danger: #dc2626;
+      --danger-bg: rgba(239, 68, 68, 0.09);
+      --display: "Sora", -apple-system, sans-serif;
+      --font: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Floating Gradient Orbs */
+    .ambient-orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 580px;
+      height: 580px;
+      background: var(--primary);
+      filter: blur(140px);
+      opacity: 0.14;
+      right: -100px;
+      top: -100px;
+    }
+    .orb-2 {
+      width: 480px;
+      height: 480px;
+      background: var(--orange);
+      filter: blur(140px);
+      opacity: 0.12;
+      left: 100px;
+      bottom: -80px;
+    }
+
+    /* Login Screen Container */
+    #loginView {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      z-index: 10;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(28px) saturate(1.6);
+      -webkit-backdrop-filter: blur(28px) saturate(1.6);
+      border-radius: 24px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 64px -12px rgba(15, 67, 179, 0.14), 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+    .brand-title {
+      font-family: var(--display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 0 0 6px;
+      letter-spacing: -0.04em;
+    }
+    .brand-title b { color: var(--orange); }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 26px;
+      line-height: 1.45;
+    }
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 7px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14.5px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      outline: none;
+      font-family: inherit;
+      transition: all 0.18s ease;
+    }
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 67, 179, 0.12);
+      background: #ffffff;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 8px 22px -3px rgba(255, 122, 0, 0.36);
+      transition: all 0.18s ease;
+    }
+    .btn-submit:hover {
+      background: var(--orange-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -3px rgba(255, 122, 0, 0.46);
+    }
+    .error-msg {
+      display: none;
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13.5px;
+      margin-bottom: 18px;
+    }
+
+    /* Modern Dashboard Layout: Sidebar + Main Stage */
+    #dashboardView {
+      display: none;
+      min-height: 100vh;
+      position: relative;
+      z-index: 10;
+    }
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Left Sidebar with Vertical Tabs */
+    .admin-sidebar {
+      width: 270px;
+      min-width: 270px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-light);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      box-shadow: 4px 0 24px rgba(15, 67, 179, 0.03);
+    }
+    .sidebar-brand {
+      padding: 0 10px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-logo {
+      font-family: var(--display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      letter-spacing: -0.04em;
+    }
+    .sidebar-logo b { color: var(--orange); }
+    .badge-ops { display:none; 
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(15, 67, 179, 0.08);
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Vertical Navigation */
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .nav-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 10px 12px 6px;
+    }
+    .v-tab-btn {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+    }
+    .v-tab-btn:hover {
+      background: rgba(15, 67, 179, 0.05);
+      color: var(--ink);
+      transform: translateX(2px);
+    }
+    .v-tab-btn.active {
+      background: rgba(15, 67, 179, 0.09);
+      color: var(--primary);
+      border-color: rgba(15, 67, 179, 0.15);
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(15, 67, 179, 0.06);
+    }
+    .v-tab-btn .tab-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .v-tab-btn .tab-icon {
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+    }
+    .v-tab-btn .tab-count {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 67, 179, 0.08);
+      color: var(--primary);
+    }
+    .v-tab-btn .tab-count.alert {
+      background: rgba(245, 158, 11, 0.16);
+      color: #b45309;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.18s ease;
+    }
+    .sidebar-link:hover {
+      color: var(--primary);
+      background: rgba(15, 67, 179, 0.04);
+    }
+
+    /* Sidebar Footer / Admin Profile */
+    .sidebar-footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--orange));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .admin-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .admin-email {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .btn-signout {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.05);
+      color: var(--danger);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .btn-signout:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Main Content Stage */
+    .admin-main {
+      flex: 1;
+      padding: 30px 36px;
+      overflow-y: auto;
+    }
+
+    /* Top Stage Bar */
+    .stage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .stage-title h1 {
+      font-family: var(--display);
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin: 0 0 4px;
+      color: var(--ink);
+    }
+    .stage-title p {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--success);
+      background: rgba(5, 150, 105, 0.08);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Modern Glass KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .kpi-card {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 10px 28px -4px rgba(15, 67, 179, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -4px rgba(15, 67, 179, 0.1);
+    }
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .kpi-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      background: rgba(15, 67, 179, 0.06);
+    }
+    .kpi-val {
+      font-family: var(--display);
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+    }
+
+    /* Glass Content Panels */
+    .table-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border-radius: 20px;
+      box-shadow: 0 16px 40px -8px rgba(15, 67, 179, 0.08), 0 2px 6px rgba(0, 0, 0, 0.02);
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 10px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 13.5px;
+      width: 280px;
+      background: #ffffff;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.18s ease;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 67, 179, 0.1);
+    }
+
+    .btn {
+      padding: 9px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: #ffffff;
+      color: var(--ink);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+    .btn:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15, 67, 179, 0.06);
+    }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 14px 22px; border-bottom: 1px solid var(--border-light); font-size: 13.5px; vertical-align: middle; }
+    th {
+      background: rgba(248, 250, 252, 0.85);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tr:hover { background: rgba(241, 245, 249, 0.6); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-gray { background: #f1f5f9; color: var(--muted); }
+
+    /* Amber Review Queue Cards */
+    .amber-card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.08);
+      transition: transform 0.18s ease;
+    }
+    .amber-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -4px rgba(245, 158, 11, 0.14);
+    }
+    .amber-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(245, 158, 11, 0.18);
+    }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      background: rgba(254, 252, 232, 0.5);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(254, 240, 138, 0.6);
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Detail Drawer */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 27, 69, 0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      justify-content: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+    .drawer-content {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(28px) saturate(1.6);
+      width: 100%;
+      max-width: 560px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 32px 28px;
+      box-shadow: -10px 0 40px rgba(15, 67, 179, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-section {
+      background: rgba(248, 250, 252, 0.85);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      font-size: 13.5px;
+    }
+    .detail-section h4 {
+      margin: 0 0 10px;
+      font-family: var(--display);
+      font-size: 12.5px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--border-light);
+    }
+    .detail-row:last-child { border-bottom: 0; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .admin-sidebar { width: 100%; height: auto; position: static; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .admin-main { padding: 20px 16px; }
+    }
+  
+    /* Mobile Header & Backdrop */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .btn-hamburger {
+      background: none;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .btn-hamburger:hover {
+      background: rgba(15, 67, 179, 0.06);
+    }
+    .mobile-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(11, 27, 69, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+    }
+    .mobile-backdrop.open {
+      display: block;
+    }
+
+    /* Consolidated Verifications Subnav */
+    .verif-subnav {
+      display: inline-flex;
+      gap: 6px;
+      background: rgba(15, 67, 179, 0.05);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .subtab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font: 600 13.5px var(--body);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .subtab-btn:hover {
+      color: var(--ink);
+    }
+    .subtab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(15, 67, 179, 0.08);
+    }
+    .subtab-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: rgba(15, 67, 179, 0.08);
+      color: var(--primary);
+    }
+    .subtab-pill.alert {
+      background: var(--warning);
+      color: #ffffff;
+    }
+
+    /* Responsive Mobile Rules */
+    @media (max-width: 900px) {
+      .mobile-header {
+        display: flex;
+      }
+      .admin-layout {
+        flex-direction: column;
+      }
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+      }
+      .admin-sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .admin-main {
+        padding: 16px 14px;
+        min-width: 0;
+        width: 100%;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+      }
+      .kpi-card {
+        padding: 14px;
+      }
+      .stage-header {
+        margin-bottom: 16px;
+      }
+      .stage-title h1 {
+        font-size: 20px;
+      }
+      .drawer-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 20px 20px 0 0 !important;
+        max-height: 90vh !important;
+        position: absolute;
+        bottom: 0;
+        top: auto;
+      }
+      .amber-head {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 12px;
+      }
+      .amber-head > div:last-child {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .compare-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .table-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .search-input {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .kpi-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+</style>
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+
+  <!-- Separate Admin Login Screen -->
+  <div id="loginView">
+    <div class="login-card">
+      <div class="brand-title">Apna<b>zo</b> <span style="font-size:14px; color:var(--muted); font-weight:600; font-family:var(--font);">· Operations</span></div>
+      <p class="subtitle">Enter your admin credentials to access the operations command center.</p>
+      <div class="error-msg" id="errorMsg">Invalid Admin ID or Password.</div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label>Admin ID / Email</label>
+          <input type="text" id="adminUser" placeholder="admin@apnazo.com" value="admin@apnazo.com" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="adminPass" placeholder="Enter password" value="ApnazoAdmin@2026" required>
+        </div>
+        <button type="submit" class="btn-submit" id="loginBtn">Sign In to Command Center &rarr;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Authenticated Command Center with Vertical Navigation Sidebar -->
+  <div id="dashboardView">
+    <!-- Mobile Navigation Topbar -->
+    <header class="mobile-header">
+      <button type="button" class="btn-hamburger" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="sidebar-logo" style="font-size:20px;">Apna<b>zo</b></div>
+      <div class="admin-avatar" style="width:32px; height:32px; font-size:12px;">AD</div>
+    </header>
+    <div id="mobileBackdrop" class="mobile-backdrop" onclick="toggleMobileSidebar(false)"></div>
+
+    <div class="admin-layout">
+
+      <!-- Left Vertical Sidebar (Consolidated & Streamlined) -->
+      <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-brand">
+          <a href="/" class="sidebar-logo">Apna<b>zo</b></a>
+          <button type="button" class="btn-hamburger" onclick="toggleMobileSidebar(false)" style="display:none; margin-left:auto;" id="mobileCloseBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="nav-group-title">Operations</div>
+          
+          <!-- Consolidated Single Verifications Tab -->
+          <button type="button" class="v-tab-btn active" id="vbtn-verifications" onclick="switchTab('verifications')">
+            <span class="tab-left">
+              <span class="tab-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              </span>
+              <span>Verifications</span>
+            </span>
+            <span class="tab-count alert" id="cntAmber">0</span>
+          </button>
+
+          <button type="button" class="v-tab-btn" id="vbtn-leads" onclick="switchTab('leads')">
+            <span class="tab-left">
+              <span class="tab-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <span>Waitlist Leads</span>
+            </span>
+            <span class="tab-count" id="cntLeads">0</span>
+          </button>
+
+          <div class="nav-group-title" style="margin-top:16px;">Platform Governance</div>
+
+          <button type="button" class="v-tab-btn" id="vbtn-agreement" onclick="switchTab('agreement')">
+            <span class="tab-left">
+              <span class="tab-icon">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span>Agreement Editor</span>
+            </span>
+            <span style="font-size:11px; color:var(--muted);" id="agreeVersionBadge">v1.2</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="admin-info">
+            <div class="admin-avatar">AD</div>
+            <div>
+              <div class="admin-name">Operations Admin</div>
+              <div class="admin-email">admin@apnazo.com</div>
+            </div>
+          </div>
+          <button type="button" class="btn-signout" onclick="logoutAdmin()" title="Sign Out">Sign Out</button>
+        </div>
+      </aside>
+
+      <!-- Main Stage -->
+      <main class="admin-main">
+        
+        <!-- Header (Clean without badge/pills) -->
+        <header class="stage-header">
+          <div class="stage-title">
+            <h1 id="stageHeading">Partner Verifications</h1>
+            <p id="stageSub">Review incoming partner documents, verify identities, and approve store activations.</p>
+          </div>
+        </header>
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card" onclick="switchTab('verifications'); switchVerifSubtab('all');" style="cursor:pointer;" title="View all partners">
+            <div class="kpi-top">
+              <span class="kpi-title">Total Sellers</span>
+              <span class="kpi-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            </div>
+            <div class="kpi-val" id="kpiSellers">0</div>
+          </div>
+
+          <div class="kpi-card" onclick="switchTab('verifications'); switchVerifSubtab('queue');" style="cursor:pointer; border-color: rgba(245, 158, 11, 0.4);" title="View pending review queue">
+            <div class="kpi-top">
+              <span class="kpi-title" style="color:var(--warning);">Action Required</span>
+              <span class="kpi-icon" style="background:var(--warning-bg); color:var(--warning);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            </div>
+            <div class="kpi-val" id="kpiAmber" style="color:var(--warning);">0</div>
+          </div>
+
+          <div class="kpi-card" style="border-color: rgba(5, 150, 105, 0.4);">
+            <div class="kpi-top">
+              <span class="kpi-title" style="color:var(--success);">Starter Live Active</span>
+              <span class="kpi-icon" style="background:var(--success-bg); color:var(--success);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+            </div>
+            <div class="kpi-val" id="kpiGreen" style="color:var(--success);">0</div>
+          </div>
+
+          <div class="kpi-card" onclick="switchTab('leads')" style="cursor:pointer;" title="View waitlist leads">
+            <div class="kpi-top">
+              <span class="kpi-title" style="color:var(--primary);">Waitlist Leads</span>
+              <span class="kpi-icon" style="background:rgba(15, 67, 179, 0.08); color:var(--primary);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            </div>
+            <div class="kpi-val" id="kpiLeads" style="color:var(--primary);">0</div>
+          </div>
+        </div>
+
+        <!-- TAB 1: Consolidated Single Verifications Tab -->
+        <div id="tab-verifications" class="tab-content">
+          <!-- Segmented subtab controller -->
+          <div class="verif-subnav">
+            <button type="button" class="subtab-btn active" id="subtab-queue" onclick="switchVerifSubtab('queue')">
+              Pending Review Queue
+              <span class="subtab-pill alert" id="subcntAmber">0</span>
+            </button>
+            <button type="button" class="subtab-btn" id="subtab-all" onclick="switchVerifSubtab('all')">
+              All Sellers Directory
+              <span class="subtab-pill" id="cntSellers">0</span>
+            </button>
+          </div>
+
+          <!-- Subview 1: Action Required Queue -->
+          <div id="subview-queue" class="table-card" style="padding: 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h3 style="margin:0; font-size:18px; font-family:var(--display);">Partner Review &amp; Document Verification</h3>
+                <p style="margin:4px 0 0; font-size:13.5px; color:var(--muted);">Inspect PAN, Bank Account, GSTIN, and Category Licences submitted by applicants.</p>
+              </div>
+              <button class="btn btn-sm" onclick="loadDashboardData()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Refresh</button>
+            </div>
+            <div id="amberList">
+              Loading applications...
+            </div>
+          </div>
+
+          <!-- Subview 2: All Sellers Directory -->
+          <div id="subview-all" class="table-card" style="display:none;">
+            <div class="table-header">
+              <input type="text" id="sellerSearch" class="search-input" placeholder="Search by store, owner, phone or ID..." oninput="filterSellersTable()">
+              <div style="display:flex; gap:10px;">
+                <a href="/api/admin/sellers/export.csv" class="btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</a>
+              </div>
+            </div>
+            <div style="overflow-x:auto; -webkit-overflow-scrolling: touch;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Store &amp; Owner</th>
+                    <th>Category &amp; Verticals</th>
+                    <th>Identity &amp; Bank</th>
+                    <th>Tier</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="sellersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Leads -->
+        <div id="tab-leads" class="tab-content" style="display:none;">
+          <div class="table-card">
+            <div class="table-header">
+              <div>
+                <h3 style="margin:0; font-size:17px; font-family:var(--display);">Waitlist Leads &amp; Inquiries</h3>
+                <p style="margin:2px 0 0; font-size:13px; color:var(--muted);">Prospective partners and customers who signed up on the landing page.</p>
+              </div>
+              <a href="/api/leads/export.csv" class="btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export Leads CSV</a>
+            </div>
+            <div style="overflow-x:auto; -webkit-overflow-scrolling: touch;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Contact Phone / Email</th>
+                    <th>Lead Source</th>
+                    <th>Registered Date</th>
+                  </tr>
+                </thead>
+                <tbody id="leadsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Agreement Editor -->
+        <div id="tab-agreement" class="tab-content" style="display:none;">
+          <div class="table-card" style="padding: 28px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;">
+              <div>
+                <h3 style="margin:0; font-size:19px; font-family:var(--display);">Partner Agreement &amp; Terms Governance</h3>
+                <p style="margin:4px 0 0; font-size:13.5px; color:var(--muted);">Edit the commercial terms and legal agreement clauses. Updates automatically sync to Step 10 of partner onboarding.</p>
+              </div>
+            </div>
+
+            <form id="agreementEditForm">
+              <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px;">
+                <div>
+                  <label>Agreement Screen Title</label>
+                  <input type="text" id="agTitle" value="Terms &amp; e-Sign Agreement">
+                </div>
+                <div>
+                  <label>Agreement Version Tag</label>
+                  <input type="text" id="agVersion" value="1.2">
+                </div>
+              </div>
+
+              <div style="margin-bottom: 18px;">
+                <label>Key Terms Box Heading</label>
+                <input type="text" id="agSummaryHeading" value="Key Commercial Terms:">
+              </div>
+
+              <div style="margin-bottom: 18px;">
+                <label>Key Terms Bullet Points (One per line)</label>
+                <textarea id="agTermsBullets" rows="5" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:12px; font-family:inherit; font-size:14px; outline:none; background:rgba(255,255,255,0.9);"></textarea>
+                <small style="color:var(--muted); font-size:12px; display:block; margin-top:4px;">Each line becomes a distinct checklist bullet point on the partner onboarding screen.</small>
+              </div>
+
+              <div style="margin-bottom: 18px;">
+                <label>Consent Checkbox Label</label>
+                <input type="text" id="agConsentLabel" value="I accept the Apnazo Partner Terms and e-Sign this agreement.">
+              </div>
+
+              <div style="margin-bottom: 22px;">
+                <label>Full Legal Agreement Text</label>
+                <textarea id="agFullText" rows="9" style="width:100%; padding:12px; border:1.5px solid #e2e8f0; border-radius:12px; font-family:inherit; font-size:13.5px; line-height:1.6; outline:none; background:rgba(255,255,255,0.9);"></textarea>
+              </div>
+
+              <div style="display:flex; gap: 14px; align-items:center;">
+                <button type="button" class="btn" style="background:var(--primary); color:#fff; padding:12px 24px; font-weight:600; border-radius:12px;" onclick="saveAgreementTerms()">
+                  Save &amp; Publish Agreement Live
+                </button>
+                <span id="agSaveStatus" style="font-size:13.5px; color:var(--success); font-weight:700; display:none;">Published live!</span>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Detail Slide-over Drawer -->
+  <div id="drawerOverlay" class="drawer-overlay" onclick="closeDrawer(event)">
+    <div class="drawer-content" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-light); padding-bottom:14px;">
+        <div>
+          <h3 id="dStoreName" style="margin:0; font-family:var(--display); font-size:20px;">Seller Profile</h3>
+          <span style="font-size:12px; color:var(--muted);">Full Partner Document Verification Details</span>
+        </div>
+        <button class="btn" onclick="closeDrawer()">Close</button>
+      </div>
+
+      <div class="detail-section">
+        <h4>Business &amp; Store Information</h4>
+        <div class="detail-row"><span>Application ID</span><span id="dId" style="font-family:monospace; font-weight:700;">-</span></div>
+        <div class="detail-row"><span>Status</span><span id="dStatus" style="font-weight:700; color:var(--primary);">-</span></div>
+        <div class="detail-row"><span>Contact Phone (+91)</span><span id="dMobile" style="font-weight:700;">-</span></div>
+        <div class="detail-row"><span>Owner Full Name</span><span id="dOwner" style="font-weight:600;">-</span></div>
+        <div class="detail-row"><span>Store Category</span><span id="dCategory">-</span></div>
+        <div class="detail-row"><span>Store Address</span><span id="dAddress">-</span></div>
+        <div class="detail-row"><span>PIN Code</span><span id="dPin">-</span></div>
+        <div class="detail-row"><span>Verticals</span><span id="dVerticals">-</span></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Identity &amp; Payout Verification</h4>
+        <div class="detail-row"><span>PAN Number</span><span id="dPan" style="font-family:monospace; font-weight:700;">-</span></div>
+        <div class="detail-row"><span>PAN Legal Name</span><span id="dPanName">-</span></div>
+        <div class="detail-row"><span>Bank Account</span><span id="dBankAcc" style="font-family:monospace;">-</span></div>
+        <div class="detail-row"><span>IFSC Code</span><span id="dBankIfsc" style="font-family:monospace; font-weight:700;">-</span></div>
+        <div class="detail-row"><span>UPI ID</span><span id="dUpi">-</span></div>
+        <div class="detail-row"><span>Beneficiary Name</span><span id="dBankBeneficiary">-</span></div>
+        <div class="detail-row"><span>GSTIN Details</span><span id="dGstin" style="font-family:monospace;">-</span></div>
+        <div class="detail-row"><span>Category Licence</span><span id="dLicence">-</span></div>
+      </div>
+
+      <div style="display:flex; gap: 12px; margin-top: auto; padding-top: 20px;">
+        <button class="btn" style="flex:1; background:var(--primary); color:#fff; padding:12px; font-weight:700; border-radius:12px;" onclick="drawerAction('GREEN', 'STARTER')">Approve Starter</button>
+        <button class="btn" style="flex:1; background:var(--danger-bg); color:var(--danger); padding:12px; font-weight:700; border-radius:12px; border-color:rgba(239,68,68,0.2);" onclick="drawerAction('RED', 'SUSPENDED')">Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var allSellers = [];
+    var allLeads = [];
+    var currentSellerId = null;
+
+    function checkAuth() {
+      var token = localStorage.getItem('apnazo_admin_session');
+      if (token) {
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'block';
+        loadDashboardData();
+      } else {
+        document.getElementById('loginView').style.display = 'flex';
+        document.getElementById('dashboardView').style.display = 'none';
+      }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var u = document.getElementById('adminUser').value.trim();
+      var p = document.getElementById('adminPass').value.trim();
+      var err = document.getElementById('errorMsg');
+      var btn = document.getElementById('loginBtn');
+
+      err.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      }).then(r => r.json()).then(res => {
+        btn.disabled = false;
+        btn.textContent = 'Sign In to Command Center →';
+        if (res.success) {
+          localStorage.setItem('apnazo_admin_session', res.token);
+          if (res.redirectUrl && window.location.port !== '3001') {
+            window.location.href = res.redirectUrl;
+          } else {
+            checkAuth();
+          }
+        } else {
+          err.textContent = res.error || 'Invalid credentials.';
+          err.style.display = 'block';
+        }
+      }).catch(e => {
+        btn.disabled = false;
+        btn.textContent = 'Sign In to Command Center →';
+        err.textContent = 'Network error. Please try again.';
+        err.style.display = 'block';
+      });
+    });
+
+    function logoutAdmin() {
+      fetch('/api/admin/logout', { method: 'POST' }).finally(() => {
+        localStorage.removeItem('apnazo_admin_session');
+        checkAuth();
+      });
+    }
+
+    function loadDashboardData() {
+      var token = localStorage.getItem('apnazo_admin_session');
+      var headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+      fetch('/api/admin/sellers', { headers: headers }).then(r => {
+        if (r.status === 401) { logoutAdmin(); return; }
+        return r.json();
+      }).then(res => {
+        if (res && res.success) {
+          allSellers = res.sellers || [];
+          renderSellers();
+        }
+      });
+
+      fetch('/api/leads', { headers: headers }).then(r => r.json()).then(res => {
+        if (res && res.success) {
+          allLeads = res.leads || [];
+          renderLeads();
+        }
+      });
+
+      loadAgreementToEditor();
+    }
+
+    function loadAgreementToEditor() {
+      fetch('/api/agreement').then(r => r.json()).then(res => {
+        if (res && res.success && res.agreement) {
+          var a = res.agreement;
+          if (a.title) document.getElementById('agTitle').value = a.title;
+          if (a.version) {
+            document.getElementById('agVersion').value = a.version;
+            document.getElementById('agreeVersionBadge').textContent = 'v' + a.version;
+          }
+          if (a.summaryHeading) document.getElementById('agSummaryHeading').value = a.summaryHeading;
+          if (a.terms && a.terms.length) {
+            document.getElementById('agTermsBullets').value = a.terms.join('\n');
+          }
+          if (a.consentCheckboxLabel) document.getElementById('agConsentLabel').value = a.consentCheckboxLabel;
+          if (a.fullAgreementText) document.getElementById('agFullText').value = a.fullAgreementText;
+        }
+      });
+    }
+
+    function saveAgreementTerms() {
+      var token = localStorage.getItem('apnazo_admin_session');
+      var title = document.getElementById('agTitle').value.trim();
+      var version = document.getElementById('agVersion').value.trim();
+      var heading = document.getElementById('agSummaryHeading').value.trim();
+      var rawBullets = document.getElementById('agTermsBullets').value.trim();
+      var consent = document.getElementById('agConsentLabel').value.trim();
+      var fullText = document.getElementById('agFullText').value.trim();
+      var statusSpan = document.getElementById('agSaveStatus');
+
+      var termsArray = rawBullets.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+
+      var payload = {
+        title: title,
+        version: version,
+        summaryHeading: heading,
+        terms: termsArray,
+        consentCheckboxLabel: consent,
+        fullAgreementText: fullText
+      };
+
+      fetch('/api/admin/agreement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(payload)
+      }).then(r => r.json()).then(res => {
+        if (res.success) {
+          statusSpan.style.display = 'inline-block';
+          document.getElementById('agreeVersionBadge').textContent = 'v' + res.agreement.version;
+          setTimeout(function(){ statusSpan.style.display = 'none'; }, 3000);
+        } else {
+          alert('Failed to save agreement: ' + res.error);
+        }
+      }).catch(err => alert('Network error: ' + err.message));
+    }
+
+        function toggleMobileSidebar(force) {
+      var sb = document.getElementById('adminSidebar');
+      var bd = document.getElementById('mobileBackdrop');
+      var closeBtn = document.getElementById('mobileCloseBtn');
+      var isOpen = sb.classList.contains('mobile-open');
+      var nextState = (force !== undefined) ? force : !isOpen;
+
+      if (nextState) {
+        sb.classList.add('mobile-open');
+        bd.classList.add('open');
+        if (closeBtn) closeBtn.style.display = 'block';
+      } else {
+        sb.classList.remove('mobile-open');
+        bd.classList.remove('open');
+        if (closeBtn) closeBtn.style.display = 'none';
+      }
+    }
+
+    function switchVerifSubtab(sub) {
+      document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('subview-queue').style.display = 'none';
+      document.getElementById('subview-all').style.display = 'none';
+
+      if (sub === 'queue') {
+        document.getElementById('subtab-queue').classList.add('active');
+        document.getElementById('subview-queue').style.display = 'block';
+      } else {
+        document.getElementById('subtab-all').classList.add('active');
+        document.getElementById('subview-all').style.display = 'block';
+      }
+    }
+
+    function switchTab(name) {
+      // Close mobile sidebar if open
+      toggleMobileSidebar(false);
+
+      // Handle legacy tab names seamlessly
+      if (name === 'amber') {
+        name = 'verifications';
+        setTimeout(() => switchVerifSubtab('queue'), 10);
+      } else if (name === 'sellers') {
+        name = 'verifications';
+        setTimeout(() => switchVerifSubtab('all'), 10);
+      }
+
+      document.querySelectorAll('.v-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      
+      var targetBtn = document.getElementById('vbtn-' + name);
+      if (targetBtn) targetBtn.classList.add('active');
+
+      var el = document.getElementById('tab-' + name);
+      if (el) el.style.display = 'block';
+
+      // Update stage heading
+      var headings = {
+        verifications: { title: "Partner Verifications", desc: "Review incoming partner documents, verify identities, and approve store activations." },
+        leads: { title: "Waitlist Leads", desc: "Customer and merchant early-access signups captured from the marketing landing page." },
+        agreement: { title: "Partner Agreement & Policy Editor", desc: "Manage legal contract clauses, platform commissions, and electronic consent terms." }
+      };
+      if (headings[name]) {
+        document.getElementById('stageHeading').textContent = headings[name].title;
+        document.getElementById('stageSub').textContent = headings[name].desc;
+      }
+    }
+
+    function renderSellers() {
+      var amberQueue = allSellers.filter(s => s.decision === 'AMBER' || s.tier === 'UNDER_REVIEW' || s.status === 'Pending Admin Review' || s.decision === 'UNDER_REVIEW');
+      var greenActive = allSellers.filter(s => s.decision === 'GREEN' || s.status === 'Active');
+
+      document.getElementById('kpiSellers').textContent = allSellers.length;
+      document.getElementById('kpiAmber').textContent = amberQueue.length;
+      document.getElementById('kpiGreen').textContent = greenActive.length;
+      document.getElementById('cntAmber').textContent = amberQueue.length;
+      var subAmber = document.getElementById('subcntAmber');
+      if (subAmber) subAmber.textContent = amberQueue.length;
+      document.getElementById('cntSellers').textContent = allSellers.length;
+
+      var amberEl = document.getElementById('amberList');
+      if (amberQueue.length === 0) {
+        amberEl.innerHTML = '<div style="text-align:center; padding: 48px 24px; color: var(--muted); font-size:14px;"><div style="margin-bottom:8px; color:var(--success);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>All applications reviewed. No pending verifications in queue.</div>';
+      } else {
+        amberEl.innerHTML = amberQueue.map(s => `
+          <div class="amber-card" id="card-${s.id}">
+            <div class="amber-head">
+              <div>
+                <strong style="font-size:16px; font-family:var(--display);">${s.basics?.bizName || 'Draft Store'}</strong>
+                <span class="badge badge-amber" style="margin-left:8px;">${s.status || 'Pending Review'}</span>
+                <div style="font-size:12.5px; color:var(--muted); margin-top:4px;">Application ID: <strong>${s.id}</strong> · Phone: <strong>+91 ${s.mobile}</strong> · Category: <strong>${s.basics?.category || 'Retail'}</strong></div>
+              </div>
+              <div style="display:flex; gap: 8px;">
+                <button class="btn" style="background:var(--primary); color:#fff; border-color:var(--primary); font-weight:700;" onclick="decideSeller('${s.id}', 'GREEN', 'STARTER', 'Admin verified and approved')">Approve Starter</button>
+                <button class="btn" onclick="viewSellerDetails('${s.id}')">Inspect All Details</button>
+                <button class="btn" style="color:var(--danger); border-color:rgba(239,68,68,0.25);" onclick="decideSeller('${s.id}', 'RED', 'SUSPENDED', 'Application rejected')">Reject</button>
+              </div>
+            </div>
+            <div class="compare-grid">
+              <div><strong>Owner / Legal Name:</strong><br>${s.basics?.ownerName || s.pan?.registeredName || 'N/A'}</div>
+              <div><strong>PAN Number:</strong><br><span style="font-family:monospace; font-weight:600;">${s.pan?.panNumber || 'Not Provided'}</span></div>
+              <div><strong>Bank Account &amp; IFSC:</strong><br><span style="font-family:monospace;">${s.bank?.accountNumber || 'N/A'}</span> · <span style="font-family:monospace; font-weight:600;">${s.bank?.ifsc || 'N/A'}</span></div>
+              <div><strong>GSTIN:</strong><br><span style="font-family:monospace;">${s.gst?.hasGst ? (s.gst?.gstin || 'Pending') : 'Exempt / No GST (< 20L)'}</span></div>
+              <div><strong>Licence / Registration:</strong><br>${s.licence?.type || 'Licence'}: ${s.licence?.number || 'N/A'}</div>
+              <div><strong>Store Address:</strong><br>${s.basics?.address || 'Rourkela'} (${s.basics?.pincode || '769001'})</div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      var sBody = document.getElementById('sellersTableBody');
+      sBody.innerHTML = allSellers.map(s => `
+        <tr class="seller-row" data-search="${(s.basics?.bizName + ' ' + s.basics?.ownerName + ' ' + s.mobile + ' ' + s.id).toLowerCase()}">
+          <td><strong style="font-family:monospace;">${s.id}</strong></td>
+          <td><b>${s.basics?.bizName || 'Draft'}</b><br><small style="color:var(--muted);">${s.basics?.ownerName || ''} · +91 ${s.mobile}</small></td>
+          <td>${s.verticals?.join(', ') || 'Retail'}<br><small style="color:var(--muted);">${s.basics?.category || 'General'}</small></td>
+          <td>PAN: <span style="font-family:monospace;">${s.pan?.panNumber || 'N/A'}</span><br><small style="color:var(--muted);">A/C: ${s.bank?.accountNumber ? '••••' + s.bank.accountNumber.slice(-4) : 'N/A'}</small></td>
+          <td><span class="badge ${s.tier === 'STARTER' ? 'badge-green' : 'badge-gray'}">${s.tier || 'STARTER'}</span></td>
+          <td><span class="badge ${s.decision === 'GREEN' ? 'badge-green' : 'badge-amber'}">${s.status || 'Active'}</span></td>
+          <td><button class="btn" onclick="viewSellerDetails('${s.id}')">Inspect</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function filterSellersTable() {
+      var q = document.getElementById('sellerSearch').value.toLowerCase();
+      var rows = document.querySelectorAll('.seller-row');
+      rows.forEach(function(row){
+        var searchStr = row.getAttribute('data-search') || '';
+        row.style.display = (!q || searchStr.includes(q)) ? '' : 'none';
+      });
+    }
+
+    function decideSeller(id, decision, tier, reason) {
+      var token = localStorage.getItem('apnazo_admin_session');
+      fetch('/api/admin/seller/decision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ id: id, decision: decision, tier: tier, reason: reason })
+      }).then(r => r.json()).then(res => {
+        if (res.success) {
+          alert('Seller status successfully updated: ' + (decision === 'GREEN' ? 'Approved (Active)' : decision));
+          loadDashboardData();
+          closeDrawer();
+        } else {
+          alert('Error: ' + res.error);
+        }
+      });
+    }
+
+    function viewSellerDetails(id) {
+      var s = allSellers.find(item => item.id === id);
+      if (!s) return;
+      currentSellerId = id;
+      var b = s.basics || {};
+      document.getElementById('dStoreName').textContent = b.bizName || 'Draft Store';
+      document.getElementById('dId').textContent = s.id;
+      document.getElementById('dStatus').textContent = s.status || 'Pending Admin Review';
+      document.getElementById('dMobile').textContent = s.mobile ? ('+91 ' + s.mobile) : '-';
+      document.getElementById('dOwner').textContent = b.ownerName || '-';
+      document.getElementById('dCategory').textContent = b.category || '-';
+      document.getElementById('dAddress').textContent = b.address || '-';
+      document.getElementById('dPin').textContent = b.pincode || '-';
+      document.getElementById('dVerticals').textContent = (s.verticals && s.verticals.length) ? s.verticals.join(', ') : 'Retail & Grocery';
+      document.getElementById('dPan').textContent = s.pan?.panNumber || 'Not Provided';
+      document.getElementById('dPanName').textContent = s.pan?.registeredName || b.ownerName || 'N/A';
+      document.getElementById('dBankAcc').textContent = s.bank?.accountNumber || 'Not Provided';
+      document.getElementById('dBankIfsc').textContent = s.bank?.ifsc || 'Not Provided';
+      document.getElementById('dUpi').textContent = s.bank?.upi || 'N/A';
+      document.getElementById('dBankBeneficiary').textContent = s.bank?.beneficiaryName || b.ownerName || 'N/A';
+      document.getElementById('dGstin').textContent = s.gst?.hasGst ? (s.gst?.gstin || 'GST Declared (Pending)') : 'Exempt / No GST (< 20L)';
+      document.getElementById('dLicence').textContent = (s.licence?.type || 'Licence') + ': ' + (s.licence?.number || 'N/A');
+      document.getElementById('drawerOverlay').classList.add('open');
+    }
+
+    function drawerAction(decision, tier) {
+      if (!currentSellerId) return;
+      decideSeller(currentSellerId, decision, tier, 'Admin decision');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerOverlay').classList.remove('open');
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

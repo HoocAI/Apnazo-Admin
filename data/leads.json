@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1794666914445,
+    "contact": "rourkela.resident@example.com",
+    "source": "Hero Waiting List",
+    "timestamp": "2026-11-14T14:35:14.445Z",
+    "ip": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.9818"
+  },
+  {
+    "id": 1794716854532,
+    "contact": "steelcity.user@gmail.com",
+    "source": "Test Hero Form",
+    "timestamp": "2026-11-15T04:27:34.532Z",
+    "ip": "127.0.0.1",
+    "userAgent": ""
+  },
+  {
+    "id": 1794718293979,
+    "contact": "samarth.shukla.qwe831@gmail.com",
+    "source": "Hero Waiting List",
+    "timestamp": "2026-11-15T04:51:33.979Z",
+    "ip": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "name": "apnazo-admin",
+  "version": "1.0.0",
+  "description": "Apnazo Operations Admin Portal & Partner Verification System",
+  "main": "admin-server.js",
+  "scripts": {
+    "start": "node admin-server.js"
+  },
+  "keywords": [
+    "apnazo",
+    "admin",
+    "portal",
+    "dashboard"
+  ],
+  "author": "Apnazo Operations Team",
+  "license": "ISC"
+}
