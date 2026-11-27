@@ -1,4 +1,4 @@
-# Apnazo Admin Operations Portal
+wad# Apnazo Admin Operations Portal
 
 Operations command portal for Apnazo Super App partners, store verifications, waitlist leads, and merchant agreement policies.
 
