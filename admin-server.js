@@ -1,3 +1,4 @@
+const db = require('./db.js');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -51,6 +52,7 @@ function saveSettings(data) {
   try {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
   } catch (e) {}
+  db.saveSettings(data, SETTINGS_FILE).catch(()=>{});
 }
 
 
@@ -117,7 +119,12 @@ function readSellers() {
 }
 
 function saveSellers(sellers) {
-  fs.writeFileSync(SELLERS_FILE, JSON.stringify(sellers, null, 2), 'utf8');
+  try {
+    fs.writeFileSync(SELLERS_FILE, JSON.stringify(sellers, null, 2), 'utf8');
+  } catch(e){}
+  if (Array.isArray(sellers)) {
+    sellers.forEach(s => db.saveSeller(s).catch(()=>{}));
+  }
 }
 
 function readAgreement() {

@@ -13,5 +13,8 @@
     "dashboard"
   ],
   "author": "Apnazo Operations Team",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^7.9.1"
+  }
 }
