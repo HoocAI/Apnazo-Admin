@@ -9,6 +9,51 @@ const LEADS_CSV = path.join(DATA_DIR, 'leads.csv');
 const SELLERS_FILE = path.join(DATA_DIR, 'sellers.json');
 const AGREEMENT_FILE = path.join(DATA_DIR, 'agreement.json');
 
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
+
+function readSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8') || '{}');
+    }
+  } catch (err) {}
+  return {
+    support: {
+      supportPhone: "+91 7355315892",
+      sellerHelpline: "+91 7355315892",
+      whatsappNumber: "+91 7355315892",
+      supportEmail: "support@apnazo.com",
+      grievanceEmail: "admin@apnazo.com",
+      officeAddress: "Main Road, Rourkela, Sundargarh, Odisha - 769001",
+      operatingHours: "9:00 AM – 9:00 PM (Monday to Sunday)"
+    },
+    forms: {
+      sellerOnboardingActive: true,
+      waitlistActive: true,
+      maxCategoriesAllowed: 10,
+      fssaiGraceDays: 15,
+      notificationEmail: "admin@apnazo.com"
+    },
+    privacy: {
+      title: "Apnazo Partner & User Privacy Policy",
+      effectiveDate: "Effective Date: November 27, 2026 · Operating in Rourkela, Odisha",
+      contentHtml: ""
+    },
+    terms: {
+      title: "Apnazo Merchant & Partner Terms of Service",
+      version: "Version 1.2 · Effective Date: November 27, 2026",
+      contentHtml: ""
+    }
+  };
+}
+
+function saveSettings(data) {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+
 // Dedicated Admin Credentials
 const ADMIN_USER = process.env.ADMIN_USER || 'admin@apnazo.com';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'ApnazoAdmin@2026';
@@ -314,6 +359,100 @@ const server = http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('No CSV data available yet.');
     }
+    return;
+  }
+
+
+  // API: Get Platform Settings (Public)
+  if ((pathname === '/api/settings' || pathname === '/api/admin/settings') && req.method === 'GET') {
+    return jsonResponse(200, { success: true, settings: readSettings() });
+  }
+
+  // API: Update Platform Settings (Protected)
+  if (pathname === '/api/admin/settings' && req.method === 'POST') {
+    if (!isAuthenticated(req)) {
+      return jsonResponse(401, { success: false, error: 'Unauthorized: Admin authentication required.' });
+    }
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body || '{}');
+        const current = readSettings();
+        if (data.support) current.support = { ...current.support, ...data.support };
+        if (data.forms) current.forms = { ...current.forms, ...data.forms };
+        current.updatedAt = new Date().toISOString();
+        saveSettings(current);
+        console.log('[Admin Settings] Platform settings updated');
+        return jsonResponse(200, { success: true, settings: current });
+      } catch (e) {
+        return jsonResponse(400, { success: false, error: 'Invalid settings JSON payload.' });
+      }
+    });
+    return;
+  }
+
+  // API: Get Privacy Policy Content (Public)
+  if ((pathname === '/api/content/privacy' || pathname === '/api/admin/content/privacy') && req.method === 'GET') {
+    return jsonResponse(200, { success: true, privacy: readSettings().privacy });
+  }
+
+  // API: Update Privacy Policy Content (Protected)
+  if (pathname === '/api/admin/content/privacy' && req.method === 'POST') {
+    if (!isAuthenticated(req)) {
+      return jsonResponse(401, { success: false, error: 'Unauthorized: Admin authentication required.' });
+    }
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body || '{}');
+        const current = readSettings();
+        current.privacy = {
+          title: (data.title || current.privacy?.title || 'Apnazo Privacy Policy').trim(),
+          effectiveDate: (data.effectiveDate || current.privacy?.effectiveDate || '').trim(),
+          contentHtml: data.contentHtml || current.privacy?.contentHtml || '',
+          updatedAt: new Date().toISOString()
+        };
+        saveSettings(current);
+        console.log('[Admin Content] Privacy policy updated');
+        return jsonResponse(200, { success: true, privacy: current.privacy });
+      } catch (e) {
+        return jsonResponse(400, { success: false, error: 'Invalid privacy payload.' });
+      }
+    });
+    return;
+  }
+
+  // API: Get Terms of Service Content (Public)
+  if ((pathname === '/api/content/terms' || pathname === '/api/admin/content/terms') && req.method === 'GET') {
+    return jsonResponse(200, { success: true, terms: readSettings().terms });
+  }
+
+  // API: Update Terms of Service Content (Protected)
+  if (pathname === '/api/admin/content/terms' && req.method === 'POST') {
+    if (!isAuthenticated(req)) {
+      return jsonResponse(401, { success: false, error: 'Unauthorized: Admin authentication required.' });
+    }
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body || '{}');
+        const current = readSettings();
+        current.terms = {
+          title: (data.title || current.terms?.title || 'Apnazo Terms of Service').trim(),
+          version: (data.version || current.terms?.version || '').trim(),
+          contentHtml: data.contentHtml || current.terms?.contentHtml || '',
+          updatedAt: new Date().toISOString()
+        };
+        saveSettings(current);
+        console.log('[Admin Content] Terms of service updated');
+        return jsonResponse(200, { success: true, terms: current.terms });
+      } catch (e) {
+        return jsonResponse(400, { success: false, error: 'Invalid terms payload.' });
+      }
+    });
     return;
   }
 
