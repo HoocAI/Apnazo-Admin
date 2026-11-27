@@ -955,6 +955,16 @@
             <span class="tab-count alert" id="cntAmber">0</span>
           </button>
 
+          <button type="button" class="v-tab-btn" id="vbtn-seller-login" onclick="openSellerOtpModal()">
+            <span class="tab-left">
+              <span class="tab-icon" style="color:var(--orange);">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              </span>
+              <span>Seller OTP Login / Hub</span>
+            </span>
+            <span class="tab-count" style="background:rgba(248,153,29,0.15); color:var(--orange); font-size:10px;">OTP</span>
+          </button>
+
           <button type="button" class="v-tab-btn" id="vbtn-leads" onclick="switchTab('leads')">
             <span class="tab-left">
               <span class="tab-icon">
@@ -1007,10 +1017,11 @@
 
         <div class="sidebar-footer">
           <div class="admin-info">
-            <div class="admin-avatar">AD</div>
+            <div class="admin-avatar" id="admAvatar">AD</div>
             <div>
-              <div class="admin-name">Operations Admin</div>
-              <div class="admin-email">admin@apnazo.com</div>
+              <div class="admin-name" id="admName">Operations Admin</div>
+              <div class="admin-email" id="admEmail">admin@apnazo.com</div>
+              <span id="admRoleBadge" style="font-size:10px; font-weight:800; background:rgba(12,131,31,0.12); color:#16a34a; padding:1px 6px; border-radius:4px; display:inline-block; margin-top:2px;">SUPER ADMIN</span>
             </div>
           </div>
           <button type="button" class="btn-signout" onclick="logoutAdmin()" title="Sign Out">Sign Out</button>
@@ -1408,9 +1419,72 @@
         <div class="detail-row"><span>Category Licence</span><span id="dLicence">-</span></div>
       </div>
 
-      <div style="display:flex; gap: 12px; margin-top: auto; padding-top: 20px;">
-        <button class="btn" style="flex:1; background:var(--primary); color:#fff; padding:12px; font-weight:700; border-radius:12px;" onclick="drawerAction('GREEN', 'STARTER')">Approve Starter</button>
-        <button class="btn" style="flex:1; background:var(--danger-bg); color:var(--danger); padding:12px; font-weight:700; border-radius:12px; border-color:rgba(239,68,68,0.2);" onclick="drawerAction('RED', 'SUSPENDED')">Reject</button>
+      <div style="display:flex; flex-direction:column; gap: 10px; margin-top: auto; padding-top: 20px;">
+        <button class="btn" style="background:#0c831f; color:#fff; padding:12px; font-weight:700; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="openSellerDashboardFromDrawer()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Open Vendor Dashboard (Impersonate / OTP)
+        </button>
+        <div style="display:flex; gap: 10px;">
+          <button class="btn" style="flex:1; background:var(--primary); color:#fff; padding:12px; font-weight:700; border-radius:12px;" onclick="drawerAction('GREEN', 'STARTER')">Approve Starter</button>
+          <button class="btn" style="flex:1; background:var(--danger-bg); color:var(--danger); padding:12px; font-weight:700; border-radius:12px; border-color:rgba(239,68,68,0.2);" onclick="drawerAction('RED', 'SUSPENDED')">Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seller OTP & Vendor Dashboard Impersonation Modal (Blinkit style) -->
+  <div class="drawer-overlay" id="sellerOtpModal" style="align-items:center; justify-content:center;" onclick="closeSellerOtpModal(event)">
+    <div style="background:#ffffff; border-radius:20px; width:100%; max-width:440px; padding:32px 28px; box-shadow:0 24px 60px rgba(11,27,69,0.2); position:relative;" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(12,131,31,0.12); color:#0c831f; display:flex; align-items:center; justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div>
+            <h3 style="margin:0; font-family:var(--display); font-size:18px;">Seller Vendor Hub Login</h3>
+            <span style="font-size:12px; color:var(--muted);">Access Vendor Store via Phone ID &amp; OTP</span>
+          </div>
+        </div>
+        <button class="btn btn-sm" onclick="closeSellerOtpModal()">✕</button>
+      </div>
+
+      <!-- Quick Seller Selector for Admin -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:6px;">Select Registered Seller</label>
+        <select id="quickSellerSelect" style="width:100%; padding:10px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13.5px; outline:none; background:#f8fafc;" onchange="onQuickSellerSelected()">
+          <option value="">-- Choose from 7 Registered Stores --</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:6px;">Seller Phone Number (Login ID)</label>
+        <div style="display:flex; gap:8px;">
+          <div style="padding:10px 12px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:10px; font-weight:700; font-size:14px; color:var(--muted);">+91</div>
+          <input type="tel" id="sellerPhoneInput" placeholder="10-digit mobile" maxlength="10" style="flex:1; padding:10px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; outline:none;">
+        </div>
+      </div>
+
+      <div id="otpInputSection" style="display:none; margin-bottom:16px;">
+        <label style="font-size:13px; font-weight:700; color:var(--ink); display:block; margin-bottom:6px;">Enter 6-Digit OTP</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="sellerOtpInput" placeholder="Enter code (or use master 123456)" maxlength="6" style="flex:1; padding:10px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:16px; font-family:monospace; font-weight:700; letter-spacing:4px; text-align:center; outline:none;">
+        </div>
+        <div id="otpHint" style="font-size:12px; color:#0c831f; font-weight:700; margin-top:6px; display:none;"></div>
+      </div>
+
+      <div id="otpStatusMsg" style="font-size:13px; margin-bottom:14px; display:none;"></div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn" id="btnRequestOtp" style="background:var(--orange); color:#fff; padding:12px; font-weight:700; border-radius:12px;" onclick="requestSellerOtp()">
+          Send OTP to Seller Phone →
+        </button>
+        <button type="button" class="btn" id="btnVerifyOtp" style="background:#0c831f; color:#fff; padding:12px; font-weight:700; border-radius:12px; display:none;" onclick="verifySellerOtpAndEnter()">
+          Verify OTP &amp; Enter Vendor Dashboard →
+        </button>
+        <!-- Super Admin Direct Impersonate Button -->
+        <button type="button" class="btn" id="btnDirectImpersonate" style="background:#f1f5f9; color:var(--ink); padding:10px; font-weight:700; border-radius:10px; border:1px solid #e2e8f0;" onclick="directAdminImpersonate()">
+          ⚡ Direct Admin Access to Store (No OTP)
+        </button>
       </div>
     </div>
   </div>
@@ -1467,6 +1541,30 @@
       if (token) {
         document.getElementById('loginView').style.display = 'none';
         document.getElementById('dashboardView').style.display = 'block';
+
+        // Check active admin user details & role
+        fetch(API_BASE + '/api/admin/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        }).then(r => r.json()).then(res => {
+          if (res.success && res.user) {
+            var u = res.user;
+            document.getElementById('admName').textContent = u.name;
+            document.getElementById('admEmail').textContent = u.email;
+            document.getElementById('admRoleBadge').textContent = u.badge.toUpperCase();
+            document.getElementById('admAvatar').textContent = (u.name || 'AD').substring(0, 2).toUpperCase();
+
+            // RBAC UI constraints
+            if (!u.permissions.includes('EDIT_LEGAL')) {
+              var btnAgr = document.getElementById('vbtn-agreement');
+              if (btnAgr) btnAgr.style.display = 'none';
+              var btnPriv = document.getElementById('vbtn-privacy');
+              if (btnPriv) btnPriv.style.display = 'none';
+              var btnTerms = document.getElementById('vbtn-terms');
+              if (btnTerms) btnTerms.style.display = 'none';
+            }
+          }
+        }).catch(()=>{});
+
         loadDashboardData();
       } else {
         document.getElementById('loginView').style.display = 'flex';
@@ -1497,7 +1595,191 @@
           if (res.redirectUrl && window.location.port !== '3001') {
             window.location.href = res.redirectUrl;
           } else {
-            checkAuth();
+            function openSellerOtpModal(prefillMobile) {
+      var modal = document.getElementById('sellerOtpModal');
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      var otpSection = document.getElementById('otpInputSection');
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      // Populate quick select from current sellers
+      sel.innerHTML = '<option value="">-- Choose from ' + allSellers.length + ' Registered Stores --</option>';
+      allSellers.forEach(s => {
+        var opt = document.createElement('option');
+        opt.value = s.mobile;
+        opt.dataset.id = s.id;
+        opt.textContent = (s.basics?.bizName || s.storeName || s.id) + ' (' + s.mobile + ')';
+        sel.appendChild(opt);
+      });
+
+      if (prefillMobile) {
+        phoneInput.value = prefillMobile;
+        sel.value = prefillMobile;
+      }
+
+      otpSection.style.display = 'none';
+      statusMsg.style.display = 'none';
+      btnReq.style.display = 'block';
+      btnReq.disabled = false;
+      btnReq.textContent = 'Send OTP to Seller Phone →';
+      btnVer.style.display = 'none';
+      document.getElementById('sellerOtpInput').value = '';
+
+      modal.classList.add('open');
+    }
+
+    function closeSellerOtpModal() {
+      document.getElementById('sellerOtpModal').classList.remove('open');
+    }
+
+    function onQuickSellerSelected() {
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      if (sel.value) {
+        phoneInput.value = sel.value;
+      }
+    }
+
+    function requestSellerOtp() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var otpSection = document.getElementById('otpInputSection');
+      var btnVer = document.getElementById('btnVerifyOtp');
+      var hint = document.getElementById('otpHint');
+
+      if (!mob || mob.length !== 10) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter a valid 10-digit mobile number.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnReq.disabled = true;
+      btnReq.textContent = 'Sending OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/login-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        btnReq.disabled = false;
+        if (res.success) {
+          statusMsg.style.color = '#0c831f';
+          statusMsg.textContent = res.message || 'OTP dispatched to +91-' + mob;
+          statusMsg.style.display = 'block';
+          otpSection.style.display = 'block';
+          btnReq.style.display = 'none';
+          btnVer.style.display = 'block';
+          if (res.devOtp) {
+            hint.textContent = 'Development OTP: ' + res.devOtp + ' (Master: 123456)';
+            hint.style.display = 'block';
+            document.getElementById('sellerOtpInput').value = res.devOtp;
+          }
+        } else {
+          btnReq.textContent = 'Send OTP to Seller Phone →';
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Failed to dispatch OTP';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnReq.disabled = false;
+        btnReq.textContent = 'Send OTP to Seller Phone →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Network error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function verifySellerOtpAndEnter() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var otp = document.getElementById('sellerOtpInput').value.trim();
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      if (!otp) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter the 6-digit OTP.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnVer.disabled = true;
+      btnVer.textContent = 'Verifying OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob, otp: otp })
+      }).then(r => r.json()).then(res => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Logged in as Seller', 'Vendor Dashboard opened for ' + (res.seller?.basics?.bizName || res.sellerId));
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Invalid OTP code.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function directAdminImpersonate() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var token = localStorage.getItem('apnazo_admin_session');
+      var statusMsg = document.getElementById('otpStatusMsg');
+
+      if (!mob) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Select or enter a seller mobile to access.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      fetch(API_BASE + '/api/admin/impersonate-seller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Vendor Dashboard Launched', 'Viewing store with Admin Impersonation privileges.');
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Impersonation failed.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function openSellerDashboardFromDrawer() {
+      if (!currentSellerId) return;
+      var s = allSellers.find(item => item.id === currentSellerId);
+      if (s) {
+        openSellerOtpModal(s.mobile);
+      }
+    }
+
+    checkAuth();
           }
         } else {
           err.textContent = res.error || 'Invalid credentials.';
@@ -1514,7 +1796,191 @@
     function logoutAdmin() {
       fetch(API_BASE + '/api/admin/logout', { method: 'POST' }).finally(() => {
         localStorage.removeItem('apnazo_admin_session');
-        checkAuth();
+        function openSellerOtpModal(prefillMobile) {
+      var modal = document.getElementById('sellerOtpModal');
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      var otpSection = document.getElementById('otpInputSection');
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      // Populate quick select from current sellers
+      sel.innerHTML = '<option value="">-- Choose from ' + allSellers.length + ' Registered Stores --</option>';
+      allSellers.forEach(s => {
+        var opt = document.createElement('option');
+        opt.value = s.mobile;
+        opt.dataset.id = s.id;
+        opt.textContent = (s.basics?.bizName || s.storeName || s.id) + ' (' + s.mobile + ')';
+        sel.appendChild(opt);
+      });
+
+      if (prefillMobile) {
+        phoneInput.value = prefillMobile;
+        sel.value = prefillMobile;
+      }
+
+      otpSection.style.display = 'none';
+      statusMsg.style.display = 'none';
+      btnReq.style.display = 'block';
+      btnReq.disabled = false;
+      btnReq.textContent = 'Send OTP to Seller Phone →';
+      btnVer.style.display = 'none';
+      document.getElementById('sellerOtpInput').value = '';
+
+      modal.classList.add('open');
+    }
+
+    function closeSellerOtpModal() {
+      document.getElementById('sellerOtpModal').classList.remove('open');
+    }
+
+    function onQuickSellerSelected() {
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      if (sel.value) {
+        phoneInput.value = sel.value;
+      }
+    }
+
+    function requestSellerOtp() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var otpSection = document.getElementById('otpInputSection');
+      var btnVer = document.getElementById('btnVerifyOtp');
+      var hint = document.getElementById('otpHint');
+
+      if (!mob || mob.length !== 10) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter a valid 10-digit mobile number.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnReq.disabled = true;
+      btnReq.textContent = 'Sending OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/login-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        btnReq.disabled = false;
+        if (res.success) {
+          statusMsg.style.color = '#0c831f';
+          statusMsg.textContent = res.message || 'OTP dispatched to +91-' + mob;
+          statusMsg.style.display = 'block';
+          otpSection.style.display = 'block';
+          btnReq.style.display = 'none';
+          btnVer.style.display = 'block';
+          if (res.devOtp) {
+            hint.textContent = 'Development OTP: ' + res.devOtp + ' (Master: 123456)';
+            hint.style.display = 'block';
+            document.getElementById('sellerOtpInput').value = res.devOtp;
+          }
+        } else {
+          btnReq.textContent = 'Send OTP to Seller Phone →';
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Failed to dispatch OTP';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnReq.disabled = false;
+        btnReq.textContent = 'Send OTP to Seller Phone →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Network error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function verifySellerOtpAndEnter() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var otp = document.getElementById('sellerOtpInput').value.trim();
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      if (!otp) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter the 6-digit OTP.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnVer.disabled = true;
+      btnVer.textContent = 'Verifying OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob, otp: otp })
+      }).then(r => r.json()).then(res => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Logged in as Seller', 'Vendor Dashboard opened for ' + (res.seller?.basics?.bizName || res.sellerId));
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Invalid OTP code.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function directAdminImpersonate() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var token = localStorage.getItem('apnazo_admin_session');
+      var statusMsg = document.getElementById('otpStatusMsg');
+
+      if (!mob) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Select or enter a seller mobile to access.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      fetch(API_BASE + '/api/admin/impersonate-seller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Vendor Dashboard Launched', 'Viewing store with Admin Impersonation privileges.');
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Impersonation failed.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function openSellerDashboardFromDrawer() {
+      if (!currentSellerId) return;
+      var s = allSellers.find(item => item.id === currentSellerId);
+      if (s) {
+        openSellerOtpModal(s.mobile);
+      }
+    }
+
+    checkAuth();
       });
     }
 
@@ -1840,6 +2306,190 @@
 
     function closeDrawer() {
       document.getElementById('drawerOverlay').classList.remove('open');
+    }
+
+    function openSellerOtpModal(prefillMobile) {
+      var modal = document.getElementById('sellerOtpModal');
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      var otpSection = document.getElementById('otpInputSection');
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      // Populate quick select from current sellers
+      sel.innerHTML = '<option value="">-- Choose from ' + allSellers.length + ' Registered Stores --</option>';
+      allSellers.forEach(s => {
+        var opt = document.createElement('option');
+        opt.value = s.mobile;
+        opt.dataset.id = s.id;
+        opt.textContent = (s.basics?.bizName || s.storeName || s.id) + ' (' + s.mobile + ')';
+        sel.appendChild(opt);
+      });
+
+      if (prefillMobile) {
+        phoneInput.value = prefillMobile;
+        sel.value = prefillMobile;
+      }
+
+      otpSection.style.display = 'none';
+      statusMsg.style.display = 'none';
+      btnReq.style.display = 'block';
+      btnReq.disabled = false;
+      btnReq.textContent = 'Send OTP to Seller Phone →';
+      btnVer.style.display = 'none';
+      document.getElementById('sellerOtpInput').value = '';
+
+      modal.classList.add('open');
+    }
+
+    function closeSellerOtpModal() {
+      document.getElementById('sellerOtpModal').classList.remove('open');
+    }
+
+    function onQuickSellerSelected() {
+      var sel = document.getElementById('quickSellerSelect');
+      var phoneInput = document.getElementById('sellerPhoneInput');
+      if (sel.value) {
+        phoneInput.value = sel.value;
+      }
+    }
+
+    function requestSellerOtp() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnReq = document.getElementById('btnRequestOtp');
+      var otpSection = document.getElementById('otpInputSection');
+      var btnVer = document.getElementById('btnVerifyOtp');
+      var hint = document.getElementById('otpHint');
+
+      if (!mob || mob.length !== 10) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter a valid 10-digit mobile number.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnReq.disabled = true;
+      btnReq.textContent = 'Sending OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/login-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        btnReq.disabled = false;
+        if (res.success) {
+          statusMsg.style.color = '#0c831f';
+          statusMsg.textContent = res.message || 'OTP dispatched to +91-' + mob;
+          statusMsg.style.display = 'block';
+          otpSection.style.display = 'block';
+          btnReq.style.display = 'none';
+          btnVer.style.display = 'block';
+          if (res.devOtp) {
+            hint.textContent = 'Development OTP: ' + res.devOtp + ' (Master: 123456)';
+            hint.style.display = 'block';
+            document.getElementById('sellerOtpInput').value = res.devOtp;
+          }
+        } else {
+          btnReq.textContent = 'Send OTP to Seller Phone →';
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Failed to dispatch OTP';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnReq.disabled = false;
+        btnReq.textContent = 'Send OTP to Seller Phone →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Network error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function verifySellerOtpAndEnter() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var otp = document.getElementById('sellerOtpInput').value.trim();
+      var statusMsg = document.getElementById('otpStatusMsg');
+      var btnVer = document.getElementById('btnVerifyOtp');
+
+      if (!otp) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Please enter the 6-digit OTP.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btnVer.disabled = true;
+      btnVer.textContent = 'Verifying OTP...';
+
+      fetch(API_BASE + '/api/auth/seller/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: mob, otp: otp })
+      }).then(r => r.json()).then(res => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Logged in as Seller', 'Vendor Dashboard opened for ' + (res.seller?.basics?.bizName || res.sellerId));
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Invalid OTP code.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        btnVer.disabled = false;
+        btnVer.textContent = 'Verify OTP & Enter Vendor Dashboard →';
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function directAdminImpersonate() {
+      var mob = document.getElementById('sellerPhoneInput').value.replace(/\D/g, '').slice(-10);
+      var token = localStorage.getItem('apnazo_admin_session');
+      var statusMsg = document.getElementById('otpStatusMsg');
+
+      if (!mob) {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Select or enter a seller mobile to access.';
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      fetch(API_BASE + '/api/admin/impersonate-seller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ mobile: mob })
+      }).then(r => r.json()).then(res => {
+        if (res.success) {
+          localStorage.setItem('apnazo_seller_token', res.token);
+          localStorage.setItem('apnazo_seller_id', res.sellerId);
+          window.open(res.dashboardUrl, '_blank');
+          closeSellerOtpModal();
+          showToast('success', 'Vendor Dashboard Launched', 'Viewing store with Admin Impersonation privileges.');
+        } else {
+          statusMsg.style.color = 'var(--danger)';
+          statusMsg.textContent = res.error || 'Impersonation failed.';
+          statusMsg.style.display = 'block';
+        }
+      }).catch(err => {
+        statusMsg.style.color = 'var(--danger)';
+        statusMsg.textContent = 'Error: ' + err.message;
+        statusMsg.style.display = 'block';
+      });
+    }
+
+    function openSellerDashboardFromDrawer() {
+      if (!currentSellerId) return;
+      var s = allSellers.find(item => item.id === currentSellerId);
+      if (s) {
+        openSellerOtpModal(s.mobile);
+      }
     }
 
     checkAuth();
