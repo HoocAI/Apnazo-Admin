@@ -2,7 +2,7 @@
 
 Operations command portal for Apnazo Super App partners, store verifications, waitlist leads, and merchant agreement policies.
 
-## Features
+## Features 
 - **Partner Verifications**: Review incoming partner applications, verify PAN, GSTIN, Bank Accounts, and category licences.
 - **Sellers Directory**: Full registry of active and starter tier partners in Rourkela with search and CSV export.
 - **Waitlist Leads**: Customer and driver waitlist leads with real-time CSV export.
