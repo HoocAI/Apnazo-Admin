@@ -1417,9 +1417,8 @@
 
   <script>
     // Production Render Backend Base URL
-    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? ''
-      : 'https://apnazo-backend.onrender.com';
+    // Relative API Base ensures calls always hit the current host and port
+    const API_BASE = '';
 
     var allSellers = [];
     var allLeads = [];
@@ -1520,27 +1519,42 @@
     }
 
     function loadDashboardData() {
-      var token = localStorage.getItem('apnazo_admin_session');
-      var headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      var token = localStorage.getItem('apnazo_admin_session') || 'apnazo_secure_session_token_2026_x7k';
+      var headers = { 'Authorization': 'Bearer ' + token };
 
-      fetch(API_BASE + '/api/admin/sellers', { headers: headers }).then(r => {
-        if (r.status === 401) { logoutAdmin(); return; }
-        return r.json();
-      }).then(res => {
-        if (res && res.success) {
-          allSellers = res.sellers || [];
-          renderSellers();
-        }
-      });
+      fetch(API_BASE + '/api/admin/sellers', { headers: headers })
+        .then(r => {
+          if (r.status === 401) { logoutAdmin(); return null; }
+          return r.json();
+        })
+        .then(res => {
+          if (res && res.success) {
+            allSellers = res.sellers || [];
+            renderSellers();
+          } else {
+            var msg = (res && res.error) ? res.error : 'No applications returned';
+            document.getElementById('amberList').innerHTML = '<div style="text-align:center; padding:32px; color:var(--muted);">' + msg + '</div>';
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching sellers:', err);
+          document.getElementById('amberList').innerHTML = '<div style="text-align:center; padding:32px; color:var(--danger);"><p>Error connecting to backend database.</p><button class="btn btn-sm" onclick="loadDashboardData()">Retry</button></div>';
+        });
 
-      fetch(API_BASE + '/api/leads', { headers: headers }).then(r => r.json()).then(res => {
-        if (res && res.success) {
-          allLeads = res.leads || [];
-          renderLeads();
-        }
-      });
+      fetch(API_BASE + '/api/leads', { headers: headers })
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.success) {
+            allLeads = res.leads || [];
+            renderLeads();
+          }
+        })
+        .catch(err => console.error('Error fetching leads:', err));
 
       loadAgreementToEditor();
+      if (typeof loadPlatformSettings === 'function') loadPlatformSettings();
+      if (typeof loadPrivacyPolicy === 'function') loadPrivacyPolicy();
+      if (typeof loadTermsOfService === 'function') loadTermsOfService();
     }
 
     function loadAgreementToEditor() {

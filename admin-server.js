@@ -212,8 +212,13 @@ const server = http.createServer((req, res) => {
     if (!isAuthenticated(req)) {
       return jsonResponse(401, { success: false, error: 'Unauthorized: Admin authentication required.' });
     }
-    const sellers = readSellers();
-    return jsonResponse(200, { success: true, count: sellers.length, sellers });
+    db.getSellers(SELLERS_FILE).then(sellers => {
+      return jsonResponse(200, { success: true, count: sellers.length, sellers });
+    }).catch(e => {
+      const sellers = readSellers();
+      return jsonResponse(200, { success: true, count: sellers.length, sellers });
+    });
+    return;
   }
 
   // API: Admin Decision on seller application (Protected)
